@@ -66,17 +66,20 @@ while 'nextPageToken' in response:
 
 import csv
 #def csv_get(threads):
+with open('threads.csv', 'w') as csvfile:
+    writer = csv.writer(csvfile, lineterminator='\n')
+    # データをリストに保持
+    csvlist = []
 
     # 以下もらったjson形式を解析
-if not threads: #大元のスレッド
-    print('No threads found.')
-else:
-    for thread in threads:
-        print('id:', thread['id'])
+    if not threads: #大元のスレッド
+        print('No threads found.')
+    else:
+        for thread in threads:
+            print('id:', thread['id'])
+            csvlist.append([thread['id']])
 
-    with open('threads.csv', 'w') as csvfile:
-        writer = csv.writer(csvfile, lineterminator='\n')
-        writer.writerows([[thread['id'],]])
+    writer.writerows([[csvlist,]])
 
 
 #開発のフローになれる
