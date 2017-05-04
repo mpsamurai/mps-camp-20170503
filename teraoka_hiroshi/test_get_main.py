@@ -23,43 +23,45 @@ store = Storage('/Users/hiroshiteraoka/GW/secrets/gmail.json')
 #まずは以上をお客様へだせる状態にする
 ################################
 
-
-###①「threadsをlistを取得する」################
-def list_get(store, SCOPES, CLIENT_SECRET_FILE):
+###認証
+def aothe_get(store, SCOPES, CLIENT_SECRET_FILE):
     credentials = store.get()
     if not credentials or credentials.invalid:
-        flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES) #Client_secret(身分書)を使って認証して!条件も伝える
-        credentials = tools.run_flow(flow, store) #上記手順を実行させる(結果,証明書がくれば=>credentialsに入れてくれ)
+        flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)  # Client_secret(身分書)を使って認証して!条件も伝える
+        credentials = tools.run_flow(flow, store)  # 上記手順を実行させる(結果,証明書がくれば=>credentialsに入れてくれ)
 
-    http = credentials.authorize(httplib2.Http()) #クレデンシャルをもったらgoogleへ投げて見てよの手順
-    service = discovery.build('gmail', 'v1', http=http) #実際にgoogleにアクセスする機能の塊を作る
+    http = credentials.authorize(httplib2.Http())  # クレデンシャルをもったらgoogleへ投げて見てよの手順
+    service = discovery.build('gmail', 'v1', http=http)  # 実際にgoogleにアクセスする機能の塊を作る
 
+    return service
+
+
+
+###Threadリスト
+def list_get(service):
     response = service.users().threads().list(userId='me').execute() #塊(service)をgoogleへ投げる users().threads()スレッドが文章の塊をリストでください(これはjsonで戻る)
     threads = response.get('threads', [])
 
-    return response, threads, service
+    return threads
 
-
+# for threads in next_page_get():
+    #ジェネレーターで next_page_get()からthreadsを１ページ終わるごと渡されて来る
+    #ようはnextPageToken が呼ばれるごとにthreadsが渡される
+    # breakで抜ける
 
 ###②「次のページ」を取ってくる################
 #ダウンロードはアクセスリミットもあるので
 #回数を指定する要素が必要
 
-def next_page_get(func):
-    response = func[0]
-    threads = func[1]
-    service = func[2]
+def next_page_get(service,threads):
+    #threads = func[1]
     n = 0
     while 'nextPageToken' in response:
-        #print(response['threads'])
-        if n < 1:
-            page_token = response['nextPageToken']
-            response = service.users().threads().list(userId='me',pageToken=page_token).execute()
-            threads.extend(response['threads'])
-            n += 1
-        else:
-            break
-    return threads,service
+        page_token = response['nextPageToken']
+        response = service.users().threads().list(userId='me',pageToken=page_token).execute()
+        threads.extend(response['threads'])
+
+        yield threads
 
 
 
@@ -112,16 +114,16 @@ def csv_get(next_page_thread):
 #クラスを考える
 
 ## 条件式が多くなったのでまとめる
-def get_message(thread): #dataは存在しているか調べる
+def get_message(thread):
 
-#メッセージをいれる準備
     message = ''
 
     #スレッドのメッセージにpartsがあるか？
+
     if 'parts' in thread['messages'][0]['payload']:
-        #partsがあればリストを展開する
+        # partsがあればリストを展開する
         for part in thread['messages'][0]['payload']['parts']:  # jsonはディクショナリなのでmessagesのなかのpayloadのなかのpartsで
-            #もしpart['body']に'data'構造が含まれているか？
+            # もしpart['body']に'data'構造が含まれているか？
             if 'data' in part['body']:
                 message += base64.urlsafe_b64decode(part['body']['data']).decode()
             else:
@@ -133,7 +135,7 @@ def get_message(thread): #dataは存在しているか調べる
                         else:
                             print('NG', i, thread['id'])
                             pass
-    #スレッドのメッセージにbodyがあるか？
+#スレッドのメッセージにbodyがあるか？
     elif 'body' in thread['messages'][0]['payload']:
         # for part in thread['messages'][0]['payload']['body']:
         # jsonはディクショナリなのでmessagesのなかのpayloadのなかのpartsで
@@ -152,12 +154,13 @@ def get_message(thread): #dataは存在しているか調べる
 
 
 
-
 ############################################
 ## 簡易テストコード #########
 if __name__ == '__main__':
-    #googleへ通信しスレッドリスト取得
-    thread_list = list_get(store, SCOPES, CLIENT_SECRET_FILE)
+    #認証
+    aothe = aothe_get(store, SCOPES, CLIENT_SECRET_FILE)
+    #スレッドリスト取得
+    thread_list = list_get(aothe)
 
     #スレッド１ページ取得後、「次のページ」も取得
     next_page_thread = next_page_get(thread_list)
