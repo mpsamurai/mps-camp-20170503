@@ -126,6 +126,8 @@ def csv_get(next_page_thread):
 
 
 
+## 条件式が多くなったのでまとめる
+def dose_parts_existt(thread): #dataは存在しているか調べる
 
 
 
