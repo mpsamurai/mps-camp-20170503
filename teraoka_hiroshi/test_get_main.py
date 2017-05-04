@@ -82,27 +82,10 @@ def csv_get(next_page_thread):
                 ###thread['id']をつかって　getメソッドでメッセージを取得する
                 thread = service.users().threads().get(userId='me', id=thread['id']).execute()
                 #messagesは中身の本文を取り出す作業が必要
-                message = ''
-                if 'parts' in thread['messages'][0]['payload']:
-                    for part in thread['messages'][0]['payload']['parts']:  # jsonはディクショナリなのでmessagesのなかのpayloadのなかのpartsで
-                        if 'data' in part['body']:
-                            message += base64.urlsafe_b64decode(part['body']['data']).decode()
-                        else:
-                            if 'parts' in part:
-                                for i,inner_part in enumerate(part['parts']):  #part２こ目がリストだから inner_partへ展開しているゆえに、innter_part['body']が使えるハズ
-                                    if 'data' in inner_part['body']:
-                                        message += base64.urlsafe_b64decode(inner_part['body']['data']).decode()
-                                    else:
-                                        print('NG',i,thread['id'])
-                                        pass
-                elif 'body' in thread['messages'][0]['payload']:
-                    # for part in thread['messages'][0]['payload']['body']:
-                    # jsonはディクショナリなのでmessagesのなかのpayloadのなかのpartsで
-                    message += base64.urlsafe_b64decode(thread['messages'][0]['payload']['body']['data']).decode()
-                    # print('body', message)
-                else:
-                    print('break',thread['id'])
-                    break
+
+
+                #####関数にまとめ中
+                message = get_message(thread)
 
                 csvlist.append(message)
         writer.writerows([csvlist, ])
@@ -123,13 +106,37 @@ def csv_get(next_page_thread):
                 #              if key in header_columns:
                 #                   header_columns[key]=value
                 # 出力用    line = [value for _, value in header_columns]
-
-
+###のこり課題###
+#関数名を適切にする
+#関数を綺麗にしていく
+#クラスを考える
 
 ## 条件式が多くなったのでまとめる
-def dose_parts_existt(thread): #dataは存在しているか調べる
+def get_message(thread): #dataは存在しているか調べる
 
+    message = ''
+    if 'parts' in thread['messages'][0]['payload']:
+        for part in thread['messages'][0]['payload']['parts']:  # jsonはディクショナリなのでmessagesのなかのpayloadのなかのpartsで
+            if 'data' in part['body']:
+                message += base64.urlsafe_b64decode(part['body']['data']).decode()
+            else:
+                if 'parts' in part:
+                    for i, inner_part in enumerate(
+                            part['parts']):  # part２こ目がリストだから inner_partへ展開しているゆえに、innter_part['body']が使えるハズ
+                        if 'data' in inner_part['body']:
+                            message += base64.urlsafe_b64decode(inner_part['body']['data']).decode()
+                        else:
+                            print('NG', i, thread['id'])
+                            pass
+    elif 'body' in thread['messages'][0]['payload']:
+        # for part in thread['messages'][0]['payload']['body']:
+        # jsonはディクショナリなのでmessagesのなかのpayloadのなかのpartsで
+        message += base64.urlsafe_b64decode(thread['messages'][0]['payload']['body']['data']).decode()
+        # print('body', message)
+    else:
+        print('break', thread['id'])
 
+    return message
 
 #日付指定をしてメッセージを取得したい
 #def get_messages(userId, date):
