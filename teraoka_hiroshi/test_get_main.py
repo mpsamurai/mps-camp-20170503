@@ -108,15 +108,20 @@ def csv_get(next_page_thread):
                 # 出力用    line = [value for _, value in header_columns]
 ###のこり課題###
 #関数名を適切にする
-#関数を綺麗にしていく
+#関数を綺麗にしていく #機能単位に論理的に構造化する(関数として切り出す)
 #クラスを考える
 
 ## 条件式が多くなったのでまとめる
 def get_message(thread): #dataは存在しているか調べる
 
+#メッセージをいれる準備
     message = ''
+
+    #スレッドのメッセージにpartsがあるか？
     if 'parts' in thread['messages'][0]['payload']:
+        #partsがあればリストを展開する
         for part in thread['messages'][0]['payload']['parts']:  # jsonはディクショナリなのでmessagesのなかのpayloadのなかのpartsで
+            #もしpart['body']に'data'構造が含まれているか？
             if 'data' in part['body']:
                 message += base64.urlsafe_b64decode(part['body']['data']).decode()
             else:
@@ -128,6 +133,7 @@ def get_message(thread): #dataは存在しているか調べる
                         else:
                             print('NG', i, thread['id'])
                             pass
+    #スレッドのメッセージにbodyがあるか？
     elif 'body' in thread['messages'][0]['payload']:
         # for part in thread['messages'][0]['payload']['body']:
         # jsonはディクショナリなのでmessagesのなかのpayloadのなかのpartsで
