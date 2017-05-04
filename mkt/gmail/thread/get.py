@@ -7,26 +7,22 @@ from oauth2client import tools
 from oauth2client.file import Storage
 
 
-__author__ == 'Junya Kaneko <junya@mpsamurai.org>'
+__author__ = 'Junya Kaneko <junya@mpsamurai.org>'
 
 
 """Problem:
-
-Your customer is a company's support center.
-
-The customer want you to develop a system that sorts their emails on gmail according to those urgency.
-
-So, you decide to make a words dictionary by using their emails for further analyses.
-
-Refactor this code so that it can download their all (or at least some) emails from gmail.
-"""
+    Your customer is a company's support center.
+    The customer want you to develop a system that sorts their emails on gmail according to those urgency.
+    So, you decide to make a words dictionary by using their emails for further analyses.
+    Refactor this code so that it can download their all (or at least some) emails from gmail.
+    """
 
 
 SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
-CLIENT_SECRET_FILE = 'secrets/junya.json'
+CLIENT_SECRET_FILE = '/Users/manzo/Downloads/client_id.json'
 APPLICATION_NAME = 'pycamp-20170503'
 
-store = Storage('secrets/gmail.json')
+store = Storage('/Users/manzo/secrets/gmail.json')
 credentials = store.get()
 if not credentials or credentials.invalid:
     flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
