@@ -8,10 +8,11 @@ import scrapy
 
 class SpiderName(scrapy.Spider):
     name = 'yahoo_news'
-    start_urls = ['https://news.yahoo.co.jp/list/?c=sports']
+    start_urls = ['https://news.yahoo.co.jp/list/?c=sports','https://news.yahoo.co.jp/list/?c=entertainment','https://news.yahoo.co.jp/list/?c=computer']
 
     def parse(self, response):
-        next_page = 1
+        #next_page = 1
+        print("1")
         item = {}
         categorydata = response.css('span[class=supple] span[class=cate]::text').extract() #ページ内のカテゴリ名
         itemdata = response.css('div[class=listArea] span[class=ttl]::text').extract() #ページ内のニュースフィードタイトルを抽出する
