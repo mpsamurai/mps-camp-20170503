@@ -22,8 +22,11 @@ class PileLine:
 
     def open_spider(self, spider):
         ##以下cur文２行は１回やれば二回以降はコメントアウト
+        #cur = self.conn.cursor()
+        #cur.execute('create table news(id serial primary key, category text, newstitle varchar);')
+
         cur = self.conn.cursor()
-        cur.execute('create table news(id serial primary key, category text, newstitle varchar);')
+        cur.execute('create table yahoonews(id serial primary key, category text, newstitle varchar);')
 
         self.conn.commit()
 
@@ -36,7 +39,8 @@ class PileLine:
         cur = self.conn.cursor()
         for key,value in item.items():
             # print(value)
-            cur.execute("insert into news(category, newstitle) values(%s,%s);", (value, key))
+            #cur.execute("insert into news(category, newstitle) values(%s,%s);", (value, key))
+            cur.execute("insert into yahoonews(category, newstitle) values(%s,%s);", (value, key))
 
         self.conn.commit()
 
@@ -45,3 +49,7 @@ class PileLine:
 
     def close_spider(self, spiders):
         self.conn.close()
+
+
+
+
